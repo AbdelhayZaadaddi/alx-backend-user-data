@@ -1,11 +1,19 @@
+#!/usr/bin/env python3
 """DB module
 """
+import logging
+from typing import Dict
+
 from sqlalchemy import create_engine
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
 from user import Base, User
+
+logging.disable(logging.WARNING)
 
 
 class DB:
@@ -28,7 +36,7 @@ class DB:
             DBSession = sessionmaker(bind=self._engine)
             self.__session = DBSession()
         return self.__session
-    
+
     def add_user(self, email: str, hashed_password: str) -> User:
         """Adds a new user to the db with the given email and hashed password.
 
