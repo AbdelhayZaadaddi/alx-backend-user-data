@@ -1,11 +1,19 @@
+#!/usr/bin/env python3
 """DB module
 """
+import logging
+from typing import Dict
+
 from sqlalchemy import create_engine
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
 from user import Base, User
+
+logging.disable(logging.WARNING)
 
 
 class DB:
@@ -28,7 +36,7 @@ class DB:
             DBSession = sessionmaker(bind=self._engine)
             self.__session = DBSession()
         return self.__session
-    
+
     def add_user(self, email: str, hashed_password: str) -> User:
         """Adds a new user to the db with the given email and hashed password.
 
@@ -49,3 +57,22 @@ class DB:
             self._session.rollback()
             raise
         return new_user
+    
+    def find_user_by(self, **kwargs: Dict[str, str]) -> User:
+        """Find a user by specified attributes.
+
+        Raises:
+            error: NoResultFound: When no results are found.
+            error: InvalidRequestError: When invalid query arguments are passed
+
+        Returns:
+            User: First row found in the `users` table.
+        """
+        session = self._session
+        try:
+            user = session.query(User).filter_by(**kwargs).one()
+        except NoResultFound:
+            raise NoResultFound()
+        except IndentationError:
+            raise InvalidRequestError()
+        return user
