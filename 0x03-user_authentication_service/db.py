@@ -57,7 +57,7 @@ class DB:
             self._session.rollback()
             raise
         return new_user
-    
+
     def find_user_by(self, **kwargs: Dict[str, str]) -> User:
         """Find a user by specified attributes.
 
@@ -73,6 +73,43 @@ class DB:
             user = session.query(User).filter_by(**kwargs).one()
         except NoResultFound:
             raise NoResultFound()
-        except IndentationError:
+        except InvalidRequestError:
             raise InvalidRequestError()
+        # print("Type of user: {}".format(type(user)))
         return user
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Updates a user's attributes by user ID and arbitrary keyword
+        arguments.
+
+        Args:
+            user_id (int): The ID of the user to update.
+            **kwargs: Keyword arguments representing the user's attributes to
+            update.
+
+        Raises:
+            ValueError: If an invalid attribute is passed in kwargs.
+
+        Returns:
+            None
+        """
+        try:
+            # Find the user with the given user ID
+            user = self.find_user_by(id=user_id)
+        except NoResultFound:
+            raise ValueError("User with id {} not found".format(user_id))
+
+        # Update user's attributes
+        for key, value in kwargs.items():
+            if not hasattr(user, key):
+                # Raise error if an argument that does not correspond to a user
+                # attribute is passed
+                raise ValueError("User has no attribute {}".format(key))
+            setattr(user, key, value)
+
+        try:
+            # Commit changes to the database
+            self._session.commit()
+        except InvalidRequestError:
+            # Raise error if an invalid request is made
+            raise ValueError("Invalid request")
