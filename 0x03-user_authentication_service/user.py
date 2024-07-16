@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+"""Module for Users.
 """
-Models for Users
-"""
+
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
