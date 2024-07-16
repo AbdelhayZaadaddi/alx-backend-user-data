@@ -57,3 +57,22 @@ class DB:
             self._session.rollback()
             raise
         return new_user
+    
+    def find_user_by(self, **kwargs: Dict[str, str]) -> User:
+        """Find a user by specified attributes.
+
+        Raises:
+            error: NoResultFound: When no results are found.
+            error: InvalidRequestError: When invalid query arguments are passed
+
+        Returns:
+            User: First row found in the `users` table.
+        """
+        session = self._session
+        try:
+            user = session.query(User).filter_by(**kwargs).one()
+        except NoResultFound:
+            raise NoResultFound()
+        except IndentationError:
+            raise InvalidRequestError()
+        return user
